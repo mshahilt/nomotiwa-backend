@@ -20,10 +20,18 @@ connectDB();app.use(
 
 app.use(express.json());
 
+app.use('/', (req, res) => {
+  res.status(200).json("Server is fine brooo")
+})
+
 app.use("/api/hospital", hospitalRoutes);
 app.use("/api/token-management", tokenManagementRoutes);
 
 initializeSocket(server);
+
+app.use('/', (req, res) => {
+  res.status(200).json("Server is fine brooo");
+});
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
