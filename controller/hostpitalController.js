@@ -18,6 +18,7 @@ const addDoctor = async (req, res) => {
       specialization,
       slots: [] 
     });
+    console.log(newDoctor);
     res.status(201).json(newDoctor);
   } catch (error) {
     res.status(500).json({ message: 'Error adding doctor' });

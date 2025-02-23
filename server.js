@@ -4,6 +4,7 @@ const http = require("http");
 const cors = require("cors");
 const connectDB = require("./config/db");
 const hospitalRoutes = require("./router/hospitalRoutes");
+const userRoutes = require('./router/userRoutes');
 const tokenManagementRoutes = require("./router/tokenManagementRoutes");
 const { initializeSocket } = require("./socket.io/socket");
 
@@ -20,18 +21,15 @@ connectDB();app.use(
 
 app.use(express.json());
 
-app.use('/', (req, res) => {
-  res.status(200).json("Server is fine brooo")
-})
-
+app.use("/api/user", userRoutes);
 app.use("/api/hospital", hospitalRoutes);
 app.use("/api/token-management", tokenManagementRoutes);
 
 initializeSocket(server);
 
-app.use('/', (req, res) => {
-  res.status(200).json("Server is fine brooo");
-});
+// app.use('/', (req, res) => {
+//   res.status(200).json("Server is fine brooo");
+// });
 
 const PORT = process.env.PORT || 8080;
 server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
