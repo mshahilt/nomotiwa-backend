@@ -58,8 +58,6 @@ const verifyOTP = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
-
-
 const getUserWithEmail = async (req, res) => {
     try {
         const { email } = req.params;
@@ -74,20 +72,31 @@ const getUserWithEmail = async (req, res) => {
             return res.status(404).json({ success: false, message: "No appointments found for this email" });
         }
 
-        const appointments = doctors.flatMap(doctor => 
-            doctor.slots
+        const appointmentsMap = new Map();
+
+        doctors.forEach(doctor => {
+            const patients = doctor.slots
                 .filter(slot => slot.patientInfo.email === email)
                 .map(slot => ({
-                    doctorId: doctor.id,
-                    doctorName: doctor.name,
-                    specialization: doctor.specialization,
                     date: slot.date,
                     tokenNumber: slot.tokenNumber,
                     patientInfo: slot.patientInfo
-                }))
-        );
+                }));
 
-        return res.status(200).json({ success: true, appointments });
+            if (patients.length) {
+                if (!appointmentsMap.has(doctor.id)) {
+                    appointmentsMap.set(doctor.id, {
+                        doctorId: doctor.id,
+                        doctorName: doctor.name,
+                        specialization: doctor.specialization,
+                        patients: []
+                    });
+                }
+                appointmentsMap.get(doctor.id).patients.push(...patients);
+            }
+        });
+
+        return res.status(200).json({ success: true, appointments: Array.from(appointmentsMap.values()) });
 
     } catch (error) {
         console.error("Error fetching appointments:", error);
