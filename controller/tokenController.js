@@ -14,7 +14,7 @@ const incrementToken = async (req, res) => {
         doctorId,
         date: today,
         currentToken: 1,
-        lastToken: 1,
+        lastToken: 0,
         status: "ACTIVE"
       });
     } else {

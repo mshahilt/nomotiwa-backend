@@ -1,6 +1,7 @@
 const sendEmail = require('../config/nodemailer').default;
 const Otp = require('../models/Otp');
 const Doctor = require('../models/Doctor');
+const TokenCounter = require('../models/TokenCounter');
 
 const authenticateUser = async (req, res) => {
     try {
@@ -74,7 +75,10 @@ const getUserWithEmail = async (req, res) => {
 
         const appointmentsMap = new Map();
 
-        doctors.forEach(doctor => {
+        for (const doctor of doctors) {
+            // Fetch the latest token for the doctor
+            const currentTokenData = await TokenCounter.findOne({ doctorId: doctor._id }).sort({ date: -1 });
+
             const patients = doctor.slots
                 .filter(slot => slot.patientInfo.email === email)
                 .map(slot => ({
@@ -89,12 +93,13 @@ const getUserWithEmail = async (req, res) => {
                         doctorId: doctor.id,
                         doctorName: doctor.name,
                         specialization: doctor.specialization,
+                        currentToken: currentTokenData ? currentTokenData.currentToken : null,
                         patients: []
                     });
                 }
                 appointmentsMap.get(doctor.id).patients.push(...patients);
             }
-        });
+        }
 
         return res.status(200).json({ success: true, appointments: Array.from(appointmentsMap.values()) });
 
@@ -103,5 +108,6 @@ const getUserWithEmail = async (req, res) => {
         return res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
+
 
 module.exports = { authenticateUser, verifyOTP, getUserWithEmail};
